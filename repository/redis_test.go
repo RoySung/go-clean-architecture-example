@@ -1,26 +1,14 @@
 package repository
 
 import (
-	"context"
+	"errors"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/redismock/v8"
+	"github.com/stretchr/testify/assert"
 )
-
-var redisMockService *miniredis.Miniredis
-var redisClient *redis.Client
-
-func setUp() {
-	redisMockService = mockRedis()
-	redisClient = redis.NewClient(&redis.Options{
-		Addr: redisMockService.Addr(),
-	})
-}
-
-func teardown() {
-	redisMockService.Close()
-}
 
 func mockRedis() *miniredis.Miniredis {
 	s, err := miniredis.Run()
@@ -33,11 +21,10 @@ func mockRedis() *miniredis.Miniredis {
 }
 
 func TestRedisStore_Get(t *testing.T) {
-	setUp()
-	defer teardown()
-	key := "test-key123"
+	key := "test-key"
 	expectValue := "test-value"
-	redisClient.Set(context.Background(), key, expectValue, 0)
+	mockClient, mock := redismock.NewClientMock()
+	mock.ExpectGet(key).SetVal(expectValue)
 
 	type fields struct {
 		Client *redis.Client
@@ -55,7 +42,7 @@ func TestRedisStore_Get(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			"test get method",
-			fields{redisClient},
+			fields{mockClient},
 			args{key},
 			expectValue,
 			false,
@@ -71,18 +58,21 @@ func TestRedisStore_Get(t *testing.T) {
 				t.Errorf("RedisStore.Get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("RedisStore.Get() = %v, want %v", got, tt.want)
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Error(err)
 			}
+
+			assert.Equal(t, got, expectValue)
 		})
 	}
 }
 
 func TestRedisStore_Set(t *testing.T) {
-	setUp()
-	defer teardown()
 	key := "test-key123"
 	expectValue := "test-value"
+	mockClient, mock := redismock.NewClientMock()
+	testError := errors.New("FAIL")
+	mock.ExpectSet(key, expectValue, 0).SetErr(testError)
 
 	type fields struct {
 		Client *redis.Client
@@ -95,14 +85,14 @@ func TestRedisStore_Set(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		wantErr bool
+		wantErr error
 	}{
 		// TODO: Add test cases.
 		{
 			"test Set method",
-			fields{redisClient},
+			fields{mockClient},
 			args{key, expectValue},
-			false,
+			testError,
 		},
 	}
 	for _, tt := range tests {
@@ -110,12 +100,11 @@ func TestRedisStore_Set(t *testing.T) {
 			s := RedisStore{
 				Client: tt.fields.Client,
 			}
-			if err := s.Set(tt.args.key, tt.args.value); (err != nil) != tt.wantErr {
+			if err := s.Set(tt.args.key, tt.args.value); err != tt.wantErr {
 				t.Errorf("RedisStore.Set() error = %v, wantErr %v", err, tt.wantErr)
-			} else {
-				if value, _ := s.Get(tt.args.key); value != expectValue {
-					t.Errorf("RedisStore.Set() value = %v, wantValue %v", value, expectValue)
-				}
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Error(err)
 			}
 		})
 	}
