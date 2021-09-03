@@ -1,6 +1,6 @@
 package domain
 
-//go:generate mockgen -source=foo.go -destination=mocks/mock_foo.go -package=mocks go-mock-example/domain/mocks Foo
+//go:generate mockgen -source=foo.go -destination=mocks/mock_foo.go -package=mocks
 type Foo interface {
 	Do(int) int
 }

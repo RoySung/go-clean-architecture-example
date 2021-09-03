@@ -1,0 +1,33 @@
+package repository
+
+import (
+	"context"
+
+	"github.com/go-redis/redis/v8"
+)
+
+type RedisStore struct {
+	Client *redis.Client
+}
+
+func (s RedisStore) Get(key string) (string, error) {
+	result, err := s.Client.Get(context.Background(), key).Result()
+
+	return result, err
+}
+
+func (s RedisStore) Set(key string, value string) error {
+	err := s.Client.Set(context.Background(), key, value, 0).Err()
+
+	return err
+}
+
+var RedisClient *redis.Client
+
+func init() {
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+}
