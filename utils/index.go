@@ -5,8 +5,9 @@ import (
 	"go-mock-example/domain"
 )
 
-func Bar(f domain.Foo) {
-	result := f.Do(1)
+func Bar(f domain.Foo) int {
+	result := f.Do(100)
 
 	fmt.Println("result: ", result)
+	return result
 }
