@@ -4,21 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redis/redismock/v8"
 	"github.com/stretchr/testify/assert"
 )
-
-func mockRedis() *miniredis.Miniredis {
-	s, err := miniredis.Run()
-
-	if err != nil {
-		panic(err)
-	}
-
-	return s
-}
 
 func TestRedisStore_Get(t *testing.T) {
 	key := "test-key"
@@ -50,7 +39,7 @@ func TestRedisStore_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := RedisStore{
+			s := RedisRepository{
 				Client: tt.fields.Client,
 			}
 			got, err := s.Get(tt.args.key)
@@ -97,7 +86,7 @@ func TestRedisStore_Set(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := RedisStore{
+			s := RedisRepository{
 				Client: tt.fields.Client,
 			}
 			if err := s.Set(tt.args.key, tt.args.value); err != tt.wantErr {
