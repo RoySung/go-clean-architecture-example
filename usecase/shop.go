@@ -9,7 +9,7 @@ type ShopUsecase struct {
 	RedisRepository domain.RedisRepository
 }
 
-func NewShopUsecase(redisRepository domain.RedisRepository) *ShopUsecase {
+func NewShopUsecase(redisRepository domain.RedisRepository) domain.IShopUsecase {
 	return &ShopUsecase{
 		RedisRepository: redisRepository,
 	}

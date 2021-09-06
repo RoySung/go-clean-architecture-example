@@ -42,8 +42,44 @@ func TestBar(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Bar(tt.args.f); got != tt.want {
+			if got := GoodBar(tt.args.f); got != tt.want {
 				t.Errorf("Bar() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func BenchmarkBar(b *testing.B) {
+	ctrl := gomock.NewController(b)
+	mockFoo := mocks.NewMockFoo(ctrl)
+	mockFoo.EXPECT().Do(100).Return(100).Times(b.N)
+
+	for i := 0; i < b.N; i++ {
+		GoodBar(mockFoo)
+	}
+}
+
+func TestAdd(t *testing.T) {
+	type args struct {
+		a int
+		b int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		// TODO: Add test cases.
+		{
+			"TEST ADD",
+			args{1, 2},
+			3,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Add(tt.args.a, tt.args.b); got != tt.want {
+				t.Errorf("Add() = %v, want %v", got, tt.want)
 			}
 		})
 	}

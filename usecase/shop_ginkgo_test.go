@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	"go-mock-example/domain"
 	"go-mock-example/domain/mocks"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+
+	// . "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +15,7 @@ var _ = Describe("ShopGinkgo", func() {
 	var (
 		mockCtrl      *gomock.Controller
 		redisRepoMock *mocks.MockRedisRepository
-		shopUsecase   *ShopUsecase
+		shopUsecase   domain.IShopUsecase
 	)
 	const productHandle = "product-handle"
 	const expectPriceStr = "10"
@@ -30,8 +32,8 @@ var _ = Describe("ShopGinkgo", func() {
 		price, err := shopUsecase.GetProductPrice(productHandle)
 
 		assert.Equal(GinkgoT(), expectPrice, price)
-		assert.Equal(GinkgoT(), err, "")
+		assert.Equal(GinkgoT(), err, nil)
 		// Expect(price).To(Equal(expectPrice))
-		Expect(err).To(BeNil())
+		// Expect(err).To(BeNil())
 	})
 })
